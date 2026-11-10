@@ -1,0 +1,70 @@
+name: Production quality checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, mysql]
+    services:
+      database:
+        image: mariadb:11.4
+        env:
+          MARIADB_DATABASE: aware_ci
+          MARIADB_ROOT_PASSWORD: ci-only-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      APP_ENV: testing
+      APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: ci-only-password
+      ITEXMO_DRY_RUN: 'true'
+      MAIL_MAILER: array
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_sqlite, pdo_mysql, xmlwriter, phar, pcntl
+          coverage: none
+        env:
+          update: true
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: composer install --no-interaction --prefer-dist --optimize-autoloader
+      - run: composer audit --locked
+      - run: npm ci
+      - run: npm audit
+      - run: npx tsc --noEmit
+      - run: npx eslint .
+      - run: npm run build
+      - name: Use isolated MariaDB for integration matrix
+        if: matrix.database == 'mysql'
+        run: |
+          sed -i 's/name="DB_CONNECTION" value="sqlite"/name="DB_CONNECTION" value="mysql"/' phpunit.xml
+          sed -i 's/name="DB_DATABASE" value=":memory:"/name="DB_DATABASE" value="aware_ci"/' phpunit.xml
+      - run: php artisan test --compact
+      - name: Format PHP and require committed formatting
+        run: |
+          php vendor/bin/pint --format agent
+          git diff --exit-code -- app bootstrap config routes tests database

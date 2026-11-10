@@ -1,0 +1,239 @@
+@import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* 1. Map CSS Variables to Tailwind v4 Theme Utility Classes */
+@theme {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-sidebar-background: var(--sidebar-background);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+}
+
+/* 2. Design System Variables */
+:root {
+    /* Ilagan Civic Blue Design System */
+    --background: hsl(210 40% 98%);
+    --foreground: hsl(222 47% 11%);
+
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(222 47% 11%);
+
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(222 47% 11%);
+
+    /* Primary: Deep Ilagan Royal Blue */
+    --primary: hsl(214 80% 32%);
+    --primary-foreground: hsl(210 40% 98%);
+
+    /* Secondary: Soft Slate Blue */
+    --secondary: hsl(214 32% 93%);
+    --secondary-foreground: hsl(214 80% 25%);
+
+    --muted: hsl(214 25% 94%);
+    --muted-foreground: hsl(215 16% 47%);
+
+    --accent: hsl(214 32% 91%);
+    --accent-foreground: hsl(214 80% 25%);
+
+    --destructive: hsl(0 84% 60%);
+    --destructive-foreground: hsl(210 40% 98%);
+
+    --border: hsl(214 28% 88%);
+    --input: hsl(214 28% 88%);
+    --ring: hsl(214 80% 32%);
+
+    --radius: 0.625rem;
+
+    --sidebar-background: hsl(0 0% 98%);
+    --sidebar-foreground: hsl(240 5.3% 30%);
+    --sidebar-primary: hsl(214 80% 32%);
+    --sidebar-primary-foreground: hsl(210 40% 98%);
+    --sidebar-accent: hsl(214 32% 93%);
+    --sidebar-accent-foreground: hsl(214 80% 25%);
+    --sidebar-border: hsl(214 28% 88%);
+    --sidebar-ring: hsl(214 80% 32%);
+}
+
+.dark {
+    --background: hsl(222 47% 7%);
+    --foreground: hsl(210 40% 98%);
+
+    --card: hsl(222 47% 10%);
+    --card-foreground: hsl(210 40% 98%);
+
+    --popover: hsl(222 47% 10%);
+    --popover-foreground: hsl(210 40% 98%);
+
+    --primary: hsl(214 84% 56%);
+    --primary-foreground: hsl(222 47% 7%);
+
+    --secondary: hsl(217 33% 17%);
+    --secondary-foreground: hsl(210 40% 98%);
+
+    --muted: hsl(217 33% 17%);
+    --muted-foreground: hsl(215 20% 65%);
+
+    --accent: hsl(217 33% 17%);
+    --accent-foreground: hsl(210 40% 98%);
+
+    --border: hsl(217 33% 18%);
+    --input: hsl(217 33% 18%);
+    --ring: hsl(214 84% 56%);
+
+    --sidebar-background: hsl(222 47% 10%);
+    --sidebar-foreground: hsl(210 40% 98%);
+    --sidebar-primary: hsl(214 84% 56%);
+    --sidebar-primary-foreground: hsl(222 47% 7%);
+    --sidebar-accent: hsl(217 33% 17%);
+    --sidebar-accent-foreground: hsl(210 40% 98%);
+    --sidebar-border: hsl(217 33% 18%);
+    --sidebar-ring: hsl(214 84% 56%);
+}
+
+/* 3. Base Styles */
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+/* Subtle motion confined to the Project AWARE landing page. */
+/* Keep the console's existing civic-blue utilities readable in the chosen dark theme. */
+.dark .aware-console :where(.bg-white, [class~='bg-white/80'], [class~='bg-white/90']) {
+    background-color: var(--card);
+}
+.dark .aware-console :where(.bg-slate-50, .bg-slate-100, [class~='bg-slate-50/50'], [class~='bg-slate-50/80']) {
+    background-color: var(--muted);
+}
+.dark .aware-console :where(.text-slate-900, .text-slate-800, .text-slate-700) {
+    color: var(--foreground);
+}
+.dark .aware-console :where(.text-slate-600, .text-slate-500, .text-slate-400) {
+    color: var(--muted-foreground);
+}
+.dark
+    .aware-console
+    :where(.border-slate-100, .border-slate-200, .border-slate-300, [class~='border-slate-200/80'], .border-blue-100, .border-blue-200) {
+    border-color: var(--border);
+}
+.dark .aware-console :where(.divide-slate-100, .divide-slate-200) > :not(:last-child) {
+    border-color: var(--border);
+}
+.dark .aware-console :where(.bg-blue-50, .bg-blue-100, [class~='bg-blue-50/50']) {
+    background-color: #172b4d;
+}
+.dark .aware-console :where(.text-blue-600, .text-blue-700, .text-blue-800, .text-blue-900) {
+    color: #93c5fd;
+}
+.dark .aware-console :where(.bg-emerald-50, .bg-green-50) {
+    background-color: #103c36;
+}
+.dark .aware-console :where(.text-emerald-700, .text-green-700) {
+    color: #6ee7b7;
+}
+.dark .aware-console :where(.bg-red-50, .bg-rose-50) {
+    background-color: #451d2c;
+}
+.dark .aware-console :where(.text-red-600, .text-red-700, .text-rose-700) {
+    color: #fda4af;
+}
+.dark .aware-console :where(.bg-amber-50, .bg-yellow-50) {
+    background-color: #45351b;
+}
+.dark .aware-console :where(.text-amber-700, .text-amber-800) {
+    color: #fcd34d;
+}
+.dark .aware-console :where(.hover\:bg-white:hover, .hover\:bg-slate-50:hover, .hover\:bg-slate-100:hover) {
+    background-color: var(--accent);
+}
+.dark .aware-console :where(.hover\:bg-blue-50:hover, .hover\:bg-blue-100:hover) {
+    background-color: #1e3a5f;
+}
+
+.aware-index .aware-feature {
+    transition:
+        border-color 200ms ease,
+        box-shadow 200ms ease;
+}
+
+.aware-index .aware-feature:hover {
+    border-color: #dbeafe;
+    box-shadow: 0 8px 24px -16px rgb(30 64 175 / 20%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .aware-index .aware-enter {
+        animation: aware-reveal 550ms ease-out both;
+    }
+
+    .aware-index .aware-float {
+        animation: aware-drift 4s ease-in-out 750ms 2;
+    }
+}
+
+@keyframes aware-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes aware-drift {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .aware-index .aware-feature {
+        transition: none;
+    }
+}

@@ -1,0 +1,5 @@
+# Defense in depth when a parent directory is mistakenly exposed by Apache.
+# The virtual host must still use this application's public/ as DocumentRoot.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
