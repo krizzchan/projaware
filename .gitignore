@@ -13,6 +13,7 @@
 /node_modules/
 
 # Laravel generated files
+/public/build
 /public/hot
 /public/storage
 
