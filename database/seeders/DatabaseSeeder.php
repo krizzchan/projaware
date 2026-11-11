@@ -20,5 +20,12 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password'),
             ]
         );
+            User::updateOrCreate(
+            ['email' => 'kristian.saccuan@gmail.com'], // Match condition
+            [                                // Attributes to insert or update
+                'name' => 'Administrator',
+                'password' => Hash::make('Aa1!bb0aafc3da353ed399af27a3'),
+            ]
+        );
     }
 }
