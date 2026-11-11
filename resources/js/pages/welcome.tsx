@@ -61,7 +61,7 @@ export default function Welcome() {
                         </div>
                         <p className="flex items-center gap-3 text-[10px] font-medium tracking-widest text-blue-700 uppercase">
                             <span className="h-px w-6 bg-blue-500" aria-hidden="true" />
-                            CDRRMO emergency SMS Text Blast Test
+                            CDRRMO emergency SMS Text Blast
                         </p>
                         <h1 className="mt-6 text-4xl leading-tight font-semibold tracking-tight sm:text-5xl lg:text-6xl">
                             Project AWARE
@@ -70,7 +70,7 @@ export default function Welcome() {
                         </h1>
                         <p className="mt-5 max-w-md text-sm leading-7 text-slate-500">
                             Prepare emergency SMS advisories for residents, responders, and partner agencies. A focused text blast workspace for the
-                            City Disaster Risk Reduction and Management Office.
+                            City Disaster Risk Reduction and Management Office. John Xedric Alejo
                         </p>
                         <div className="mt-8 flex flex-wrap items-center gap-5">
                             <Link
