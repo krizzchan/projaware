@@ -39,8 +39,10 @@ jobs:
           SSH_PORT: ${{ secrets.HOSTINGER_PORT }}
         run: |
           mkdir -p "$HOME/.ssh"
+
           printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
           chmod 600 "$HOME/.ssh/id_ed25519"
+
           ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> "$HOME/.ssh/known_hosts"
 
       - name: Upload Laravel source
@@ -93,6 +95,7 @@ jobs:
             --exclude='index.php' \
             --exclude='.htaccess' \
             --exclude='build' \
+            --exclude='storage' \
             -czf - -C public . |
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
             "tar -xzf - -C '$REMOTE_PUBLIC'"
@@ -111,13 +114,50 @@ jobs:
             mkdir -p "$REMOTE_PUBLIC/build"
 
             cp -a "$REMOTE_APP/public/build/." "$REMOTE_PUBLIC/build/"
-
-            cd "$REMOTE_APP"
-            php artisan optimize:clear
-            php artisan optimize
           REMOTE
 
-      - name: Verify Laravel entry file
+      - name: Restore Laravel entry point
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.HOSTINGER_HOST }}
+          SSH_PORT: ${{ secrets.HOSTINGER_PORT }}
+          SSH_USER: ${{ secrets.HOSTINGER_USER }}
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "REMOTE_PUBLIC='$REMOTE_PUBLIC' bash -s" <<'REMOTE'
+            set -e
+
+            cat > "$REMOTE_PUBLIC/index.php" <<'PHP'
+<?php
+
+use Illuminate\Http\Request;
+
+define('LARAVEL_START', microtime(true));
+
+if (file_exists($maintenance = __DIR__.'/../laravel_app/storage/framework/maintenance.php')) {
+    require $maintenance;
+}
+
+require __DIR__.'/../laravel_app/vendor/autoload.php';
+
+(require_once __DIR__.'/../laravel_app/bootstrap/app.php')
+    ->handleRequest(Request::capture());
+PHP
+
+            chmod 644 "$REMOTE_PUBLIC/index.php"
+          REMOTE
+
+      - name: Clear Laravel cache
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.HOSTINGER_HOST }}
+          SSH_PORT: ${{ secrets.HOSTINGER_PORT }}
+          SSH_USER: ${{ secrets.HOSTINGER_USER }}
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "cd '$REMOTE_APP' && php artisan optimize:clear && php artisan optimize"
+
+      - name: Verify Laravel entry point
         shell: bash
         env:
           SSH_HOST: ${{ secrets.HOSTINGER_HOST }}
