@@ -1,32 +1,61 @@
+# macOS
 .DS_Store
+
+# Laravel environment files
 .env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
-/.fleet
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/bootstrap/ssr
-/node_modules
+.env.*
+!.env.example
+
+# Laravel dependencies
+/vendor/
+
+# Node dependencies
+/node_modules/
+
+# Laravel generated files
 /public/build
 /public/hot
 /public/storage
+
+# Laravel runtime files
 /storage/*.key
 /storage/pail
-/vendor
-auth.json
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+
+# Laravel bootstrap cache
+/bootstrap/cache/*
+
+# IDE and editor files
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+.phpactor.json
+
+# PHPUnit
+.phpunit.result.cache
+/.phpunit.cache
+
+# Laravel SSR
+/bootstrap/ssr
+
+# Local development files
 Homestead.json
 Homestead.yaml
+
+# Authentication credentials
+auth.json
+/auth.json
+
+# Logs
 npm-debug.log
 yarn-error.log
 
-# Environment variants and diagnostic artifacts may contain credentials.
-.env.*
-!.env.example
-/auth.json
+# Database dumps and backups
 *.sql
 *.sql.gz
