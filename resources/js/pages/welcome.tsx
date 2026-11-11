@@ -61,7 +61,7 @@ export default function Welcome() {
                         </div>
                         <p className="flex items-center gap-3 text-[10px] font-medium tracking-widest text-blue-700 uppercase">
                             <span className="h-px w-6 bg-blue-500" aria-hidden="true" />
-                            CDRRMO emergency SMS Text Blast
+                            CDRRMO emergency SMS Text Blast Test
                         </p>
                         <h1 className="mt-6 text-4xl leading-tight font-semibold tracking-tight sm:text-5xl lg:text-6xl">
                             Project AWARE
