@@ -1,0 +1,128 @@
+name: Deploy Laravel and React
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      REMOTE_APP: /home/u960835472/domains/cdrrmcilagan.com/laravel_app
+      REMOTE_PUBLIC: /home/u960835472/domains/cdrrmcilagan.com/public_html
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build React and Vite
+        run: |
+          npm ci
+          npm run build
+
+      - name: Configure SSH
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+          SSH_HOST: ${{ secrets.HOSTINGER_HOST }}
+          SSH_PORT: ${{ secrets.HOSTINGER_PORT }}
+        run: |
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 600 "$HOME/.ssh/id_ed25519"
+          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> "$HOME/.ssh/known_hosts"
+
+      - name: Upload Laravel source
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.HOSTINGER_HOST }}
+          SSH_PORT: ${{ secrets.HOSTINGER_PORT }}
+          SSH_USER: ${{ secrets.HOSTINGER_USER }}
+        run: |
+          tar \
+            --exclude='.git' \
+            --exclude='.env' \
+            --exclude='vendor' \
+            --exclude='node_modules' \
+            --exclude='storage' \
+            --exclude='public/build' \
+            -czf - . |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "tar -xzf - -C '$REMOTE_APP'"
+
+      - name: Install Composer dependencies
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.HOSTINGER_HOST }}
+          SSH_PORT: ${{ secrets.HOSTINGER_PORT }}
+          SSH_USER: ${{ secrets.HOSTINGER_USER }}
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "cd '$REMOTE_APP' && composer2 install --no-dev --no-interaction --prefer-dist --optimize-autoloader"
+
+      - name: Upload Vite build to Laravel
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.HOSTINGER_HOST }}
+          SSH_PORT: ${{ secrets.HOSTINGER_PORT }}
+          SSH_USER: ${{ secrets.HOSTINGER_USER }}
+        run: |
+          tar -czf - -C public build |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "rm -rf '$REMOTE_APP/public/build' && mkdir -p '$REMOTE_APP/public' && tar -xzf - -C '$REMOTE_APP/public'"
+
+      - name: Upload public assets
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.HOSTINGER_HOST }}
+          SSH_PORT: ${{ secrets.HOSTINGER_PORT }}
+          SSH_USER: ${{ secrets.HOSTINGER_USER }}
+        run: |
+          tar \
+            --exclude='index.php' \
+            --exclude='.htaccess' \
+            --exclude='build' \
+            -czf - -C public . |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "tar -xzf - -C '$REMOTE_PUBLIC'"
+
+      - name: Publish Vite build to public_html
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.HOSTINGER_HOST }}
+          SSH_PORT: ${{ secrets.HOSTINGER_PORT }}
+          SSH_USER: ${{ secrets.HOSTINGER_USER }}
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" <<REMOTE
+            set -e
+
+            rm -rf "$REMOTE_PUBLIC/build"
+            mkdir -p "$REMOTE_PUBLIC/build"
+
+            cp -a "$REMOTE_APP/public/build/." "$REMOTE_PUBLIC/build/"
+
+            cd "$REMOTE_APP"
+            php artisan optimize:clear
+            php artisan optimize
+          REMOTE
+
+      - name: Verify Laravel entry file
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.HOSTINGER_HOST }}
+          SSH_PORT: ${{ secrets.HOSTINGER_PORT }}
+          SSH_USER: ${{ secrets.HOSTINGER_USER }}
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "test -f '$REMOTE_PUBLIC/index.php'"
